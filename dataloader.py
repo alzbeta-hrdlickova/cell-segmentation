@@ -5,13 +5,12 @@ import torch
 import glob
 from skimage.io import imread
 from torch.utils import data
+from scipy.spatial import distance
 
 class Dataloader(data.Dataset):
     """Nacitani dat"""
 
     def __init__(self,path_to_data='/Users/betyadamkova/Desktop/data_vse/stage1_train'):
-        
-        self.path=path_to_data + '/' 
      
         self.maska_list=[]
         self.orig_list=[]
@@ -19,45 +18,46 @@ class Dataloader(data.Dataset):
         self.slozka= glob.glob(path_to_data + '/*') 
         
         for i in self.slozka:
-            nazev_maska = glob.glob(i + '/masks/*.png')
-            nazev_orig = glob.glob(i + '/images/*.png')
-            print(nazev_orig)
+            nazev_maska = glob.glob(i + '/masks/*.png')     #názvy obrázků masek
+            nazev_orig = glob.glob(i + '/images/*.png')     #názvy původních obrázků
+            #print(nazev_orig)
+            
             orig = imread(nazev_orig[0])
+            self.orig_list.append(orig)         #přidání orig do orig_list
             
-            self.orig_list.append(orig)
-        
-            
-            maska = numpy.zeros((256,256))
-            
-            for k in nazev_maska:
-                 #prochazeni slozky
-                maska_k = imread(k)
-                maska = maska + maska_k
-                
-                
-            self.maska_list.append(maska)
-           
-            """   
-            imgplot = plt.imshow(maska)
-            plt.show()
-            img.imsave('maska.png',maska,cmap="gray")     
-            """ 
+            dim1 = orig.shape[0]
+            dim2 = orig.shape[1]
+            maska = numpy.zeros((dim1,dim2))    #vytvoření matice nul o velikosti orig
+
+    #ulozit nazvy masek, bez imread = nazev_maska   
                 
     
     def __len__(self):
-        return len(self.maska_list)
+        return len(self.orig_list)     #vrací délku datasetu
 
 
-
-    def __getitem__(self, idx):     
+    def __getitem__(self, idx): 
+            
+    #seznam cest obrazku
+        for k in nazev_maska:           #procházení masek a sčítání dohromady
+            maska_k = imread(k)
+            maska = maska + maska_k
+                
+        self.maska_list.append(maska)
         
-        #img_mask = torch.Tensor(img_mask.astype(np.float32)/255-0.5)
-        #lbl=torch.Tensor(np.array(self.lbls[idx]).astype(np.float32))
+     #distancni mapu, regresovat 
+        dist_map_list = []
+        dist_map = distance.euclidean(maska_list)
+        dist_map_list.append(dist_map)
+                       
+     #predelat na float, batch [1,m,n] pro orig i masku
+        image = imread(self.maska_list[idx])
+        image = torch.Tensor(image.astype(numpy.float32)/255-0.5)
+        image_orig = torch.Tensor(numpy.array(self.orig_list[idx]).astype(numpy.float32))
+        return image,image_orig
       
-        return self.maska_list[idx],self.orig_list[idx]
-
 loader = Dataloader()
-#trainloader= data.Dataloader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True)
+#trainloader = data.Dataloader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True)
 
 
 """
