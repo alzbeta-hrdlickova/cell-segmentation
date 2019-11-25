@@ -12,18 +12,20 @@ from scipy import ndimage
 class DataLoader(data.Dataset):
     """Nacitani dat"""
 
-    def __init__(self,split="trenink",path_to_data='/Users/betyadamkova/Desktop/data',patch_size=[224,224]):
-                                        #nazapomenout předělat odkaz na celý soubor dat!!!
+    def __init__(self,split="trenink",path_to_data='/Users/betyadamkova/Desktop/data_vse',patch_size=[224,224]):
+                                      
         self.patch_size=patch_size
-     
         self.split=split
-        self.path=path_to_data + '/' + split 
+        
+        if self.split == 'trenink':
+            self.slozky=glob.glob(path_to_data + '/stage1_train/*')
+        else:
+            self.slozky=glob.glob(path_to_data + '/stage1_test/*')  
         
         self.maska_list=[]
         self.orig_list=[]
-        self.slozka= glob.glob(path_to_data + '/*') 
         
-        for i in self.slozka:
+        for i in self.slozky:
             nazev_maska = glob.glob(i + '/masks/*.png')     #názvy obrázků masek
             nazev_orig = glob.glob(i + '/images/*.png')     #názvy původních obrázků
             
@@ -45,14 +47,17 @@ class DataLoader(data.Dataset):
         for k in nazev_maska:           
             maska_k = imread(k)             #nacteni kazde k-te masky
             dist_map = ndimage.distance_transform_edt(maska_k)
-            maska = maska + dist_map        #pricita distancni mapu
+            maska = maska + dist_map        #pricitani distancni mapy
             
         #zmena velikosti obrazku, nahodny vyrezek, nejlepe stred pak
-        r1=torch.randint(in_size[0]-out_size[0],(1,1)).view(-1).numpy()[0]
-        r2=torch.randint(in_size[1]-out_size[1],(1,1)).view(-1).numpy()[0]
-        r=[r1,r2]
+        if self.split=='trenink':
+            r1=torch.randint(in_size[0]-out_size[0],(1,1)).view(-1).numpy()[0]
+            r2=torch.randint(in_size[1]-out_size[1],(1,1)).view(-1).numpy()[0]
+            r=[r1,r2]
+        else:
+            r=[0,0]
         
-        #vyindexovat obrazky
+        #vyindexovani obrazku
         orig=orig[r[0]:r[0]+out_size[0],r[1]:r[1]+out_size[1],:]
         maska=maska[r[0]:r[0]+out_size[0],r[1]:r[1]+out_size[1]]    
          
@@ -60,12 +65,10 @@ class DataLoader(data.Dataset):
         image = torch.Tensor(maska.astype(np.float32).reshape((1,out_size[0],out_size[1])))
         image_orig=np.transpose(orig[:,:,0:3].astype(np.float32),(2,0,1))/255-0.5
         image_orig = torch.Tensor(image_orig)
-        #print(image)
-        #print(image_orig)
     
         return image,image_orig
     
-
+"""
 loader = DataLoader(split='trenink')
 trainloader = data.DataLoader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True) 
 
@@ -75,3 +78,4 @@ for it,(mask,orig) in enumerate(trainloader):
     plt.show()
     plt.imshow(mask[0,0,:,:],cmap="gray")
     break
+"""
