@@ -25,6 +25,10 @@ net.requires_grad=True
 
 optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
+#vytvorit list pro vysledky loss
+hodnoty_train=[]
+hodnoty_test=[]
+
 it=-1
 for epoch in range(1000):
   for k,(data,lbl) in enumerate(trainloader):
