@@ -8,31 +8,11 @@ from torch.utils import data
 from dataloader import DataLoader
 from Unet import Unet
 
-
-batch=1  #batch alespon 16
-
-loader = DataLoader(split='trenink') 
-trainloader= torch.utils.data.DataLoader(loader,batch_size=batch, num_workers=0, shuffle=True,drop_last=True)
-  
-loader = DataLoader(split='test')
-testloader= torch.utils.data.DataLoader(loader,batch_size=1, num_workers=0, shuffle=True,drop_last=True)
-
-#device="cuda" if torch.cuda.is_available() else "cpu"
-#model=model.to(device)
-
-net=Unet()      #.cuda()
-net.requires_grad=True
-
-optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
-
-#vytvorit list pro vysledky loss, každou 50-tou hodnotu, vykreslit do grafu
-hodnoty_train=[]
-hodnoty_test=[]
-
-it=-1
-for epoch in range(1000):
+hodnoty_treninku=[]
+def training ():
+  running_loss =0
   for k,(data,lbl) in enumerate(trainloader):
-    it+=1
+
     
     data=data       #.cuda()
     lbl=lbl         #.cuda()
@@ -43,60 +23,76 @@ for epoch in range(1000):
     optimizer.zero_grad()   # zero the gradient buffers
     
     net.train()
+    #datanp=data.cpu().detach().numpy()
     
     output=net(data)
-
-    datanp=data.cpu().detach().numpy()
-    
-    output=net(data)
-    outputnp=data.cpu().detach().numpy() #prevedeni pro zobrazeni
+    #outputnp=data.cpu().detach().numpy() #prevedeni pro zobrazeni
      
     #MSE=torch.nn.MSELoss(size_avarage=False)
     loss=torch.mean((lbl-output)**2)
     loss.backward()  # pocitani gradientu
     optimizer.step() # update parametrs
     
-    
+    print(f'{k}/{len(trainloader)}/{epoch}')        #heartbeat, ukaze kolik
+    running_loss+=loss.item()*data.size(0)       #runing loss- soucet lossu v epoche
+  running_loss=running_loss/len(trainloader)
+  hodnoty_treninku.append(running_loss)    
+  
+  plt.plot(hodnoty_treninku)
+  plt.show()
 
-    #jednou za určitý počet epoch je potřeba změřit výsledky
-    #to stejné jako při trénování ale bez výpočtu gradientu úpravy vah
-    if it%50==0:  
-      for kk,(data,lbl) in enumerate(testloader):
-          
-          net=Unet()          #.cuda()
-          net.requires_grad=True
+
+hodnoty_test=[]
+def evaluating ():
+    with torch.no_grad():       #s vypnutým pocitani gradientu
+        running_loss =0
+        for kk,(data,lbl) in enumerate(testloader):        
             
-          optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+             data=data       #.cuda()
+             lbl=lbl         #.cuda()
             
-          it=-1
-          for epoch in range(1000):
-             for k,(data,lbl) in enumerate(trainloader):
-                 it+=1
-                
-                 data=data       #.cuda()
-                 lbl=lbl         #.cuda()
-                
-                 data.requires_grad=True
-                 lbl.requires_grad=True
-                
-                 optimizer.zero_grad()   # zero the gradient buffers
-                    
-                 net.eval()
-               
-                 output=net(data)
-            
-                 datanp=data.cpu().detach().numpy()
-                
-                 output=net(data)
-                 outputnp=data.cpu().detach().numpy() 
-                 
-                 loss=torch.mean((lbl-output)**2)
-                 ##loss.backward() 
-                 optimizer.step() 
+             net.eval()
+    
+             output=net(data)
+             #outputnp=data.cpu().detach().numpy() 
+             
+             loss=torch.mean((lbl-output)**2)
+             running_loss+=loss.item()*data.size(0)       #runing loss- soucet lossu v epoche
+        running_loss=running_loss/len(trainloader)
+        hodnoty_test.append(running_loss)    
+  
+    plt.plot(hodnoty_test)
+    plt.show()
+                     
+
+batch=1  #batch alespon 16
+
+loader = DataLoader(split='debug') 
+trainloader= torch.utils.data.DataLoader(loader,batch_size=batch, num_workers=0, shuffle=True,drop_last=True)
+  
+loader = DataLoader(split='debug_test')
+testloader= torch.utils.data.DataLoader(loader,batch_size=1, num_workers=0, shuffle=True,drop_last=True)
+
+#device="cuda" if torch.cuda.is_available() else "cpu"
+#net=net.to(device)
+
+net=Unet()      #.cuda()
+net.requires_grad=True
+
+optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+
+for epoch in range(1000):
+  training()
+ 
+
+  if epoch%1==0:  
+     evaluating()
+
 """        
 #zapis hodnot do grafu     
-hodnoty_train.append(output[0,0,:,:].data.cpu().numpy())`
-hodnoty_test.append(lbl[0][0].data.cpu().numpy())`
+plt.plot(loss_values)
+plt.plot(hodnoty_test)
+plt.show
 
 #vykreslit obrazky, puvodni a segmentovany
 plt.subplot(121)

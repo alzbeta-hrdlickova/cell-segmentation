@@ -12,13 +12,17 @@ from scipy import ndimage
 class DataLoader(data.Dataset):
     """Nacitani dat"""
 
-    def __init__(self,split="trenink",path_to_data='/Users/betyadamkova/Desktop/data_vse',patch_size=[224,224]):
-                                      
+    def __init__(self,split="trenink",path_to_data='/Users/betyadamkova/Desktop/data_vse',patch_size=[128,128]):
+                                      #bude asi potrebovat predelat velikost dle testovych dat
         self.patch_size=patch_size
         self.split=split
         
         if self.split == 'trenink':
             self.slozky=glob.glob(path_to_data + '/stage1_train/*')
+        elif self.split == 'debug':
+            self.slozky=glob.glob(path_to_data + '/debug/*')
+        elif self.split == 'debug_test':
+            self.slozky=glob.glob(path_to_data + '/debug_test/*')
         else:
             self.slozky=glob.glob(path_to_data + '/stage1_test/*')  
         
@@ -69,6 +73,7 @@ class DataLoader(data.Dataset):
         return image,image_orig
     
 """
+#volani fce a vykresleni
 loader = DataLoader(split='trenink')
 trainloader = data.DataLoader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True) 
 
