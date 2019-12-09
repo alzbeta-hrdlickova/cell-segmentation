@@ -8,11 +8,20 @@ from torch.utils import data
 from dataloader import DataLoader
 from Unet import Unet
 
+#generator
+def inf_train_gen():
+        while True:
+            for img,mask in trainloader:
+                yield img,mask
+
+        gen = inf_train_gen()
+
 hodnoty_treninku=[]
 def training ():
   running_loss =0
-  for k,(data,lbl) in enumerate(trainloader):
-
+  for k in range (50):
+    
+    data,lbl=next(gen)
     
     data=data       #.cuda()
     lbl=lbl         #.cuda()
@@ -24,7 +33,6 @@ def training ():
     
     net.train()
     #datanp=data.cpu().detach().numpy()
-    
     output=net(data)
     #outputnp=data.cpu().detach().numpy() #prevedeni pro zobrazeni
      
@@ -33,10 +41,10 @@ def training ():
     loss.backward()  # pocitani gradientu
     optimizer.step() # update parametrs
     
-    print(f'{k}/{len(trainloader)}/{epoch}')        #heartbeat, ukaze kolik
-    running_loss+=loss.item()*data.size(0)       #runing loss- soucet lossu v epoche
-  running_loss=running_loss/len(trainloader)
-  hodnoty_treninku.append(running_loss)    
+    print(f'{k}/{len(trainloader)}/{epoch}')        #heartbeat - prubezne ukaze kolik
+    running_loss+=loss.item() #*data.size(0)          #runing loss- soucet lossu v epoche
+  running_loss=running_loss/(50)        #podelení delkou datasetu
+  hodnoty_treninku.append(running_loss)             #pridani do
   
   plt.plot(hodnoty_treninku)
   plt.show()
@@ -57,7 +65,7 @@ def evaluating ():
              #outputnp=data.cpu().detach().numpy() 
              
              loss=torch.mean((lbl-output)**2)
-             running_loss+=loss.item()*data.size(0)       #runing loss- soucet lossu v epoche
+             running_loss+=loss.item() #*data.size(0)       #runing loss- soucet lossu v epoche
         running_loss=running_loss/len(trainloader)
         hodnoty_test.append(running_loss)    
   
@@ -81,22 +89,24 @@ net.requires_grad=True
 
 optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
-for epoch in range(1000):
-  training()
+for epoch in range(10):
+  
+    for i in range(10):
+        training()
  
 
   if epoch%1==0:  
      evaluating()
 
-"""        
+       
 #zapis hodnot do grafu     
-plt.plot(loss_values)
+plt.plot(hodnoty_treninku)
 plt.plot(hodnoty_test)
 plt.show
-
+"""
 #vykreslit obrazky, puvodni a segmentovany
 plt.subplot(121)
-plt.imshow(outputnp)    #output[1][0].cpu().numpy()
+plt.imshow(output)    #output[1][0].cpu().numpy()
 plt.subplot(122)
 plt.imshow(lbl)         #(data[1].data.cpu().permute(1,2,0).numpy()*0.5+0.5))
 
