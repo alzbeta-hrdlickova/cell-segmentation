@@ -12,7 +12,7 @@ from scipy import ndimage
 class DataLoader(data.Dataset):
     """Nacitani dat"""
 
-    def __init__(self,split="trenink",path_to_data='/Users/betyadamkova/Desktop/data_vse',patch_size=[224,224]):
+    def __init__(self,split="trenink",path_to_data='/home/ubmi/Documents/data_vse',patch_size=[128,128]):
                                       #bude asi potrebovat predelat velikost dle testovych dat
         self.patch_size=patch_size
         self.split=split
@@ -22,7 +22,7 @@ class DataLoader(data.Dataset):
         elif self.split == 'debug':
             self.slozky=glob.glob(path_to_data + '/debug/*')
         elif self.split == 'debug_test':
-            self.slozky=glob.glob(path_to_data + '/debug_test/*')
+            self.slozky = glob.glob(path_to_data + '/debug_test/*')
         else:
             self.slozky=glob.glob(path_to_data + '/stage1_test/*')  
         
@@ -71,16 +71,14 @@ class DataLoader(data.Dataset):
         image_orig = torch.Tensor(image_orig)
     
         return image,image_orig
-    
-"""
-#volani fce a vykresleni
-loader = DataLoader(split='trenink')
-trainloader = data.DataLoader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True) 
 
-for it,(mask,orig) in enumerate(trainloader):
-    tmp=np.transpose(orig.numpy()[0,:,:,:],[1,2,0])
-    plt.imshow(tmp+0.5)
-    plt.show()
-    plt.imshow(mask[0,0,:,:],cmap="gray")
-    break
-"""
+if __name__ == "__main__":
+    #volani fce a vykresleni
+    loader = DataLoader(split='trenink')
+    trainloader = data.DataLoader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True) 
+    for it,(mask,orig) in enumerate(trainloader):
+        tmp=np.transpose(orig.numpy()[0,:,:,:],[1,2,0])
+        plt.imshow(tmp+0.5)
+        plt.show()
+        plt.imshow(mask[0,0,:,:],cmap="gray")
+        break
