@@ -8,41 +8,49 @@ from torch.utils import data
 from dataloader import DataLoader
 from Unet import Unet
 
+#generator
+def inf_train_gen():
+    while True:
+        for img,mask in trainloader:
+            yield img,mask
+        gen = inf_train_gen()
+
 hodnoty_treninku=[]
 def training ():
   running_loss =0
-  for k,(data,lbl) in enumerate(trainloader):
+  for k,(data,lbl) in enumerate(50):
+      
+      data,lbl=next(gen)
 
+      data=data.cuda()
+      lbl=lbl.cuda()
     
-    data=data.cuda()
-    lbl=lbl.cuda()
+      data.requires_grad=True
+      lbl.requires_grad=True
     
-    data.requires_grad=True
-    lbl.requires_grad=True
+      optimizer.zero_grad()   # zero the gradient buffers
     
-    optimizer.zero_grad()   # zero the gradient buffers
+      net.train()
+      #datanp=data.cpu().detach().numpy()
     
-    net.train()
-    #datanp=data.cpu().detach().numpy()
-    
-    output=net(data)
-    #outputnp=data.cpu().detach().numpy() #prevedeni pro zobrazeni
+      output=net(data)
+      #outputnp=data.cpu().detach().numpy() #prevedeni pro zobrazeni
      
-    #MSE=torch.nn.MSELoss(size_avarage=False)
-    loss=torch.mean((lbl-output)**2)
-    loss.backward()  # pocitani gradientu
-    optimizer.step() # update parametrs
+      #MSE=torch.nn.MSELoss(size_avarage=False)
+      loss=torch.mean((lbl-output)**2)
+      loss.backward()  # pocitani gradientu
+      optimizer.step() # update parametrs
     
-    print(f'{k}/{len(trainloader)}/{epoch}')        #heartbeat, ukaze kolik
-    running_loss+=loss.item()*data.size(0)          #runing loss- soucet lossu v epoche
-  running_loss=running_loss/len(trainloader)
-  hodnoty_treninku.append(running_loss)    
+      print(f'{k}/{len(trainloader)}/{epoch}')        #heartbeat, ukaze kolik
+      running_loss+=loss.item()*data.size(0)          #runing loss- soucet lossu v epoche
+    running_loss=running_loss/(50)
+    hodnoty_treninku.append(running_loss)    
   
-  plt.plot(hodnoty_treninku)
-  plt.show()
-  plt.imshow(output[0,0,:,:].detach().cpu().numpy())
-  plt.show()
-  plt.imshow(lbl[0,0,:,:].detach().cpu().numpy())
+    plt.plot(hodnoty_treninku)
+    plt.show()
+    plt.imshow(output[0,0,:,:].detach().cpu().numpy())
+    plt.show()
+    plt.imshow(lbl[0,0,:,:].detach().cpu().numpy())
   
 
 
@@ -67,9 +75,11 @@ def evaluating ():
   
     plt.plot(hodnoty_test)
     plt.show()
+    plt.imshow(output[0,0,:,:].detach().cpu().numpy())
+    plt.show()
+    plt.imshow(lbl[0,0,:,:].detach().cpu().numpy())
     
-                     
-
+##############################################################################                    
 batch=16  
 
 loader = DataLoader(split='trenink') 
@@ -86,7 +96,7 @@ optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 device="cuda" if torch.cuda.is_available() else "cpu"
 net=net.to(device)
 
-for epoch in range(100):
+for epoch in range(10):
   training()
  
 
@@ -103,9 +113,8 @@ plt.show
 
 #vykreslit obrazky, puvodni a segmentovany
 plt.subplot(121)
-plt.imshow(output[0,0,:,:].detach().cpu().numpy())    #output[1][0].cpu().numpy()
+plt.imshow(output[0,0,:,:].detach().cpu().numpy())    
 plt.subplot(122)        
-plt.imshow(lbl[0,0,:,:].detach().cpu().numpy())   #(data[1].data.cpu().permute(1,2,0).numpy()*0.5+0.5))
-
+plt.imshow(lbl[0,0,:,:].detach().cpu().numpy())   
 
 """
