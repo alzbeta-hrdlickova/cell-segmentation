@@ -13,12 +13,13 @@ def inf_train_gen():
     while True:
         for img,mask in trainloader:
             yield img,mask
-        gen = inf_train_gen()
+            
+gen = inf_train_gen()
 
 hodnoty_treninku=[]
 def training ():
   running_loss =0
-  for k,(data,lbl) in enumerate(50):
+  for k in range (50):
       
       data,lbl=next(gen)
 
@@ -42,16 +43,15 @@ def training ():
       optimizer.step() # update parametrs
     
       print(f'{k}/{len(trainloader)}/{epoch}')        #heartbeat, ukaze kolik
-      running_loss+=loss.item()*data.size(0)          #runing loss- soucet lossu v epoche
-    running_loss=running_loss/(50)
-    hodnoty_treninku.append(running_loss)    
+      running_loss+=loss.item() #*data.size(0)          #runing loss- soucet lossu v epoche
+  running_loss=running_loss/(50)
+  hodnoty_treninku.append(running_loss)    
   
-    plt.plot(hodnoty_treninku)
-    plt.show()
-    plt.imshow(output[0,0,:,:].detach().cpu().numpy())
-    plt.show()
-    plt.imshow(lbl[0,0,:,:].detach().cpu().numpy())
-  
+  plt.plot(hodnoty_treninku)
+  plt.show()
+  plt.imshow(output[0,0,:,:].detach().cpu().numpy())
+  plt.show()
+  plt.imshow(lbl[0,0,:,:].detach().cpu().numpy())
 
 
 hodnoty_test=[]
@@ -69,8 +69,8 @@ def evaluating ():
              #outputnp=data.cpu().detach().numpy() 
              
              loss=torch.mean((lbl-output)**2)
-             running_loss+=loss.item()*data.size(0)       #runing loss- soucet lossu v epoche
-        running_loss=running_loss/len(trainloader)
+             running_loss+=loss.item() #*data.size(0)       #runing loss- soucet lossu v epoche
+        running_loss=running_loss/len(testloader)
         hodnoty_test.append(running_loss)    
   
     plt.plot(hodnoty_test)
@@ -102,13 +102,15 @@ for epoch in range(10):
 
   if epoch%1==0:  
      evaluating()
+     
+     torch.save(net.state_dict(), '/home/ubmi/Documents/data_vse/model.pt')
 
 
 
 """        
 #zapis hodnot do grafu     
-plt.plot(loss_values)
-plt.plot(hodnoty_test)
+plt.plot(hodnoty_treninku, 'b')
+plt.plot(hodnoty_test,'r')
 plt.show
 
 #vykreslit obrazky, puvodni a segmentovany

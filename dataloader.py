@@ -12,7 +12,7 @@ from scipy import ndimage
 class DataLoader(data.Dataset):
     """Nacitani dat"""
 
-    def __init__(self,split="trenink",path_to_data='/home/ubmi/Documents/data_vse',patch_size=[128,128]):
+    def __init__(self,split="trenink",path_to_data='/Users/betyadamkova/Desktop/data_vse',patch_size=[224,224]):
                                       #bude asi potrebovat predelat velikost dle testovych dat
         self.patch_size=patch_size
         self.split=split
@@ -23,6 +23,8 @@ class DataLoader(data.Dataset):
             self.slozky=glob.glob(path_to_data + '/debug/*')
         elif self.split == 'debug_test':
             self.slozky = glob.glob(path_to_data + '/debug_test/*')
+        elif self.split == 'final_test':
+            self.slozky = glob.glob(path_to_data + '/stage2_test_final/*')
         else:
             self.slozky=glob.glob(path_to_data + '/stage1_test/*')  
         
