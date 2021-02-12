@@ -1,1 +1,1 @@
-# My project
+# Cell segmentation
