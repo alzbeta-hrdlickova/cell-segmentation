@@ -18,17 +18,6 @@ from torch.utils import data
 from torch.utils.data import random_split
 
 batch=16
-""" 
-dataset = DataLoader(split='trenink') 
-trainloader= torch.utils.data.DataLoader(dataset,batch_size=batch, num_workers=4, shuffle=True,drop_last=True)
-  
-valset = DataLoader(split='test')
-testloader= torch.utils.data.DataLoader(valset,batch_size=1, num_workers=1, shuffle=True,drop_last=True)
-
-test = DataLoader(split='final_test')
-finaltestloader= torch.utils.data.DataLoader(test,batch_size=1, num_workers=1, shuffle=True,drop_last=True)
-
-"""
 
 dataset = DataLoader(split="trenink")
 trainset, valset, test= random_split(dataset, [600,69,1])
@@ -39,7 +28,6 @@ testloader = torch.utils.data.DataLoader(
     valset, batch_size=batch, num_workers=1, shuffle=True, drop_last=True)
 finaltestloader = torch.utils.data.DataLoader(
     test, batch_size=batch, num_workers=1, shuffle=True, drop_last=True)
-#"""
 
 net=Unet().cuda()
 net.requires_grad=True
@@ -55,7 +43,7 @@ train_loss_tmp=[]
 test_loss_tmp=[]
 
 it=-1
-for epoch in range(5):
+for epoch in range(50):
   for k,(data,lbl) in enumerate(trainloader):
     it+=1
     print(it)
@@ -157,13 +145,9 @@ print('Training finished!!!')
 
 #########################################################################################
 device = torch.device("cuda")
-net = Unet()
-net.load_state_dict(torch.load('/home/ubmi/Documents/data_vse/model2.pt'))
-net.to(device)
-
-final_test_loss_tmp=[]
-final_test_loss=[]
-position=[]
+net = Unet()                                                                #instancování třídy vytvořené v modelu
+net.load_state_dict(torch.load('/home/ubmi/Documents/data_vse/model2.pt'))  #volání natrénovaného modelu
+net=net.to(device)
 
 it=-1
 for jj,(data,lbl) in enumerate(finaltestloader):
@@ -176,10 +160,6 @@ for jj,(data,lbl) in enumerate(finaltestloader):
     net.eval()
 
     output=net(data)    
-    
-    loss=torch.mean((lbl-output)**2)
-
-    final_test_loss_tmp.append(loss.detach().cpu().numpy())
         
     fig = plt.figure()
     fig.add_subplot(1, 3, 1)
@@ -189,16 +169,8 @@ for jj,(data,lbl) in enumerate(finaltestloader):
     fig.add_subplot(1, 3, 3)
     plt.imshow(lbl[0, 0, :, :].detach().cpu().numpy(), cmap="gray")
     
-    
-"""
-    plt.savefig('images/final/final_test.png')
-
-"""
-
-final_test_loss.append(np.mean(final_test_loss_tmp))
-position.append(it)
-     
-final_test_loss_tmp=[]
-      
-fig = plt.figure()
-plt.plot(position,final_test_loss, label="training loss") 
+    #prevest na np array,ulozit
+    output = output.data.cpu().numpy()
+    np.save('images/final/output' + str(it), output)
+    lbl = lbl.data.cpu().numpy()
+    np.save('images/final/lbl'+ str(it), lbl)
