@@ -20,7 +20,7 @@ from torch.utils.data import random_split
 batch=16
 
 dataset = DataLoader(split="trenink")
-trainset, valset, test= random_split(dataset, [600,69,1])
+trainset, valset, test= random_split(dataset, [530,70,70])
 
 trainloader = torch.utils.data.DataLoader(
     trainset, batch_size=batch, num_workers=8, shuffle=True, drop_last=True)
