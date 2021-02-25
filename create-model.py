@@ -22,12 +22,9 @@ batch=16
 dataset = DataLoader(split="trenink")
 trainset, valset, test= random_split(dataset, [530,70,70])
 
-trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=batch, num_workers=8, shuffle=True, drop_last=True)
-testloader = torch.utils.data.DataLoader(
-    valset, batch_size=batch, num_workers=1, shuffle=True, drop_last=True)
-finaltestloader = torch.utils.data.DataLoader(
-    test, batch_size=batch, num_workers=1, shuffle=True, drop_last=True)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, num_workers=1, shuffle=True, drop_last=True)
+testloader = torch.utils.data.DataLoader(valset, batch_size=1, num_workers=1, shuffle=True, drop_last=True)
+finaltestloader = torch.utils.data.DataLoader(test, batch_size=1, num_workers=1, shuffle=True, drop_last=True)
 
 net=Unet().cuda()
 net.requires_grad=True
