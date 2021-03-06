@@ -171,3 +171,5 @@ for jj,(data,lbl) in enumerate(finaltestloader):
     np.save('images/final/output' + str(it), output)
     lbl = lbl.data.cpu().numpy()
     np.save('images/final/lbl'+ str(it), lbl)
+
+    
