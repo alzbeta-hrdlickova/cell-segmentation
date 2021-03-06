@@ -68,13 +68,6 @@ for epoch in range(50):
     train_loss_tmp.append(loss.detach().cpu().numpy())
     
     if it%50==0:
-      """  
-      d=data[0,0,:,:].detach().cpu().numpy()
-      r=output[0,0,:,:].detach().cpu().numpy()
-      g=lbl[0,0,:,:].detach().cpu().numpy()
-      plt.imshow(np.concatenate((d,r,g),axis=1),cmap='gray')
-      plt.show()
-      """
               
       fig = plt.figure()
       fig.add_subplot(1, 3, 1)
@@ -111,15 +104,8 @@ for epoch in range(50):
           fig.add_subplot(1, 3, 2)
           plt.imshow(output[0, 0, :, :].detach().cpu().numpy(), cmap="gray")
           fig.add_subplot(1, 3, 3)
-          plt.imshow(lbl[0, 0, :, :].detach().cpu().numpy(), cmap="gray")
-        
-        #d=data[0,0,:,:].detach().cpu().numpy()
-        #r=output[0,0,:,:].detach().cpu().numpy()
-        #g=lbl[0,0,:,:].detach().cpu().numpy()
-        #plt.imshow(np.concatenate((d,r,g),axis=1),cmap='gray',vmin=0,vmax=1)
-        #plt.show()
-        
-      
+          plt.imshow(lbl[0, 0, :, :].detach().cpu().numpy(), cmap="gray"
+             
       train_loss.append(np.mean(train_loss_tmp))
       test_loss.append(np.mean(test_loss_tmp))
       position.append(it)
