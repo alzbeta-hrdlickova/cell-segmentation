@@ -30,7 +30,7 @@ for fin in range(70):
                 output[x,y] = 0
             else:
                 output[x,y] = 1
-                plt.imshow(output,cmap="gray")
+    plt.imshow(output,cmap="gray")
           
     TP = np.sum(((lbl==1) & (output ==1)).astype(np.float32))
     FN = np.sum(((lbl==0) & (output ==0)).astype(np.float32))
