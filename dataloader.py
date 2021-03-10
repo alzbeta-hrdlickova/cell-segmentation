@@ -1,47 +1,80 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-path_to_file='images/final/' 
+import torch
+import glob
+from skimage.io import imread
+from torch.utils import data
+from scipy import ndimage
 
-sensitivity_set=[] 
+class DataLoader(data.Dataset):
+    """Nacitani dat"""
 
-it=-1
-for fin in range(70):
-    it+=1
-    print(it)
-    
-    lbl =np.load(path_to_file + 'lbl' + str(it) +'.npy') 
-    lbl=lbl[0,0,:,:]
-    threshold1=np.mean(lbl)
-    for x in range(224):      
-        for y in range(224):
-            if lbl[x,y] >= threshold1:
-                lbl[x,y] = 1
-            else:
-                lbl[x,y] = 0
-    plt.imshow(lbl,cmap="gray")
+    def __init__(self,split="trenink",path_to_data='/home/ubmi/Documents/data_vse',patch_size=[224,224]):
+                                      #bude asi potrebovat predelat velikost dle testovych dat - vyradit nevhodne
+        self.patch_size=patch_size
+        self.split=split
+        #rozdělení do složek
+        if self.split == 'trenink':
+            self.slozky=glob.glob(path_to_data + '/stage1_train/*')
+                 
+        self.maska_list=[]
+        self.orig_list=[] 
+        
+        for i in self.slozky:
+            nazev_maska = glob.glob(i + '/masks/*.png')     #názvy obrázků masek
+            nazev_orig = glob.glob(i + '/images/*.png')     #názvy původních obrázků
+            
+            self.orig_list.append(nazev_orig)         
+            self.maska_list.append(nazev_maska)
+ 
+    def __len__(self):
+        return len(self.orig_list)     #vrací délku datasetu
+
+    def __getitem__(self, idx): 
+            
+        nazev_maska = self.maska_list[idx]        #seznam cest obrazku
+        orig = imread(self.orig_list[idx][0])
+        maska = np.zeros((orig.shape[0],orig.shape[1])) 
+        #print(self.orig_list[idx])
+        
+        out_size=self.patch_size
+        in_size=orig.shape
+        
+        for k in nazev_maska:           
+            maska_k = imread(k)             #nacteni kazde k-te masky
+            dist_map = ndimage.distance_transform_edt(maska_k)
+            maska = maska + dist_map        #pricitani distancni mapy
+            
+        #zmena velikosti obrazku, nahodny vyrezek, nejlepe stred pak
+        if self.split=='trenink':
+            r1=torch.randint(in_size[0]-out_size[0],(1,1)).view(-1).numpy()[0]
+            r2=torch.randint(in_size[1]-out_size[1],(1,1)).view(-1).numpy()[0]
+            r=[r1,r2]
+        else:
+            r=[0,0]
+        
+        #vyindexovani obrazku
+        orig=orig[r[0]:r[0]+out_size[0],r[1]:r[1]+out_size[1],:]
+        maska=maska[r[0]:r[0]+out_size[0],r[1]:r[1]+out_size[1]]    
          
-    output =np.load(path_to_file + 'output' + str(it) +'.npy')
-    output=output[0,0,:,:]
-    threshold2=np.mean(output)
-    for x in range(224):
-        for y in range(224):
-            if output[x,y] <= threshold2:
-                output[x,y] = 0
-            else:
-                output[x,y] = 1
-    plt.imshow(output,cmap="gray")
-          
-    TP = np.sum(((lbl==1) & (output ==1)).astype(np.float32))
-    FN = np.sum(((lbl==0) & (output ==0)).astype(np.float32))
-    sensitivity = TP / (TP + FN)
-    sensitivity_set.append(sensitivity)
-    final_sensitivity=sum(sensitivity_set)/70
+        #predela na float, [1,m,n] pro orig i masku
+        image = torch.Tensor(maska.astype(np.float32).reshape((1,out_size[0],out_size[1])))
+        image_orig=np.transpose(orig[:,:,0:3].astype(np.float32),(2,0,1))/255-0.5
+        image_orig = torch.Tensor(image_orig)
+    
+        return image,image_orig
 
-fig = plt.figure()
-fig.add_subplot(1, 2, 1)   
-plt.imshow(lbl,cmap="gray")
-fig.add_subplot(1, 2, 2)
-plt.imshow(output,cmap="gray")
-
-print(final_sensitivity)
+if __name__ == "__main__":
+    #volani fce a vykresleni
+    loader = DataLoader(split='trenink')
+    trainloader = data.DataLoader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True) 
+    for it,(mask,orig) in enumerate(trainloader):
+        tmp=np.transpose(orig.numpy()[0,:,:,:],[1,2,0])
+        fig = plt.figure()
+        fig.add_subplot(1, 2, 1)
+        plt.imshow(tmp+0.5)
+        fig.add_subplot(1, 2, 2)
+        plt.imshow(mask[0,0,:,:],cmap="gray")
+        
+        break
