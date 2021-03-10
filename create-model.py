@@ -14,11 +14,11 @@ trainset, valset, test= random_split(dataset, [530,70,70])
 #print(len(finaltestloader))  
 
 trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=batch, num_workers=8, shuffle=True, drop_last=True)
+    trainset, batch_size=batch, num_workers=0, shuffle=True, drop_last=True)
 testloader = torch.utils.data.DataLoader(
-    valset, batch_size=batch, num_workers=8, shuffle=True, drop_last=True)
+    valset, batch_size=batch, num_workers=0, shuffle=True, drop_last=True)
 finaltestloader = torch.utils.data.DataLoader(
-    test, batch_size=batch, num_workers=8, shuffle=True, drop_last=True)  
+    test, batch_size=batch, num_workers=0, shuffle=True, drop_last=True)  
 
 net=Unet().cuda()
 net.requires_grad=True
@@ -34,7 +34,7 @@ train_loss_tmp=[]
 test_loss_tmp=[]
 
 it=-1
-for epoch in range(1):
+for epoch in range(12):
   for k,(data,lbl) in enumerate(trainloader):
     it+=1
     print(it)
