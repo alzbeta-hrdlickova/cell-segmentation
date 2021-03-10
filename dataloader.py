@@ -78,3 +78,4 @@ if __name__ == "__main__":
         plt.imshow(mask[0,0,:,:],cmap="gray")
         
         break
+        
