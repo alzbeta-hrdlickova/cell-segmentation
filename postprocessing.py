@@ -36,17 +36,7 @@ it=-1
 for fin in range(70):
     it+=1
     #print(it)
-    lbl =np.load(path_to_file + 'lbl' + str(it) +'.npy') 
-    lbl_set.append(lbl[0,0,:,:])
-    """
-    for x in range(lbl[0,0,:,:].shape[0]):
-        for y in range(lbl[0,0,:,:].shape[1]):
-            
-            if lbl[0,0,:,:][x,y] < -0.45 :
-                lbl[0,0,:,:][x,y] = 1
-            else:
-                lbl[0,0,:,:][x,y] = 0     
-    """
+
     output =np.load(path_to_file + 'output' + str(it) +'.npy')
     output_set.append(output[0,0,:,:])
     dice_dice=dice_loss(output,lbl)
