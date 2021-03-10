@@ -10,28 +10,6 @@ for fin in range(70):
     it+=1
     print(it)
     
-    """
-    lbl =np.load('/Users/betyadamkova/Desktop/final/lbl/' + 'lbl' + str(it) +'.npy') 
-    lbl=lbl[0,0,:,:]
-    threshold1=np.mean(lbl)
-    
-    binar1=[]
-    binar2=[]
-    if threshold1 > -0.1: #bílý pozadí
-        binar1 = 0  
-        binar2 = 1  
-    elif threshold1 < -0.1: #čený pozadí 
-        binar1 = 1 
-        binar2 = 0   
-                 
-    for x in range(224):      
-        for y in range(224):
-            if lbl[x,y] >= threshold1:
-                lbl[x,y] = binar1
-            else:
-                lbl[x,y] = binar2
-    #plt.imshow(lbl,cmap="gray")
-    """
     data =np.load('/Users/betyadamkova/Desktop/final/data/' + 'data' + str(it) +'.npy') 
     data=data[0,0,:,:]
     threshold1=np.mean(data)
@@ -67,3 +45,9 @@ fig.add_subplot(1, 2, 2)
 plt.imshow(output,cmap="gray")
 
 print(final_sensitivity)
+
+
+#precision =  TP/ (FP + TP)
+#accuracy = (TN + TP)/ (TN + FP + FN + TP)
+#Dice = 2*TP / ( 2*TP + FP + FN )
+#Jaccard = TP / ( TP + FP + FN ) 
