@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage.filters import try_all_threshold
+from skimage.filters import threshold_otsu
 
 path_to_file='/Users/betyadamkova/Desktop/final/' 
 
@@ -13,10 +15,11 @@ it=-1
 for fin in range(70):
     it+=1
     print(it)
-    
+
     data =np.load('/Users/betyadamkova/Desktop/final/data/' + 'data' + str(it) +'.npy') 
-    data=data[0,0,:,:]
-    threshold1=0.1      #najít optimální threshold
+    data=data[0,0,:,:]      
+    #fig, ax = try_all_threshold(data, figsize=(10, 6), verbose=False)    #najít optimální threshold
+    threshold1=threshold_otsu(data) 
     for x in range(224):      
         for y in range(224):
             if data[x,y] >= threshold1:
@@ -27,7 +30,7 @@ for fin in range(70):
     
     output =np.load('/Users/betyadamkova/Desktop/final/output/' + 'output' + str(it) +'.npy')
     output=output[0,0,:,:]
-    threshold2= -0.28
+    threshold2= threshold_otsu(output)
     for x in range(224):
         for y in range(224):
             if output[x,y] <= threshold2:
