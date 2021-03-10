@@ -23,18 +23,6 @@ fig.add_subplot(1, 2, 2)
 output0=np.load('images/final/output0.npy')
 plt.imshow(output0[0,0,:,:],cmap="gray")
 
-def dice_loss(output, lbl):
-  
-    smooth = 1.
-    iflat = lbl[0,0,:,:]
-    tflat = output[0,0,:,:]
-    intersection = (iflat * tflat).sum()
-    A_sum = np.sum(iflat).astype(np.float32 )
-    B_sum = np.sum(tflat).astype(np.float32 )
-    
-    return 1 - ((2. * intersection + smooth) / (A_sum + B_sum + smooth) )
-#dice_loss(output0, lbl0)
-
 lbl_set=[]   
 output_set=[]   
 dice_set=[] 
