@@ -2,8 +2,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.filters import try_all_threshold
 from skimage.filters import threshold_otsu
+from scipy import ndimage as ndi
 
-path_to_file='/Users/betyadamkova/Desktop/final/' 
+from skimage.segmentation import watershed
+from skimage.feature import peak_local_max
+
+
+def binar(data):
+    data=data[0,0,:,:]
+    #fig, ax = try_all_threshold(data, figsize=(10, 6), verbose=False)    #najít optimální threshold
+    threshold=threshold_otsu(data)
+    for x in range(224):      
+        for y in range(224):
+            if data[x,y] >= threshold:
+                data[x,y] = 1
+            else:
+                data[x,y] = 0
+    return data
 
 sensitivity_set=[] 
 specificity_set=[]
@@ -17,28 +32,11 @@ for fin in range(70):
     print(it)
 
     data =np.load('/Users/betyadamkova/Desktop/final/data/' + 'data' + str(it) +'.npy') 
-    data=data[0,0,:,:]      
-    #fig, ax = try_all_threshold(data, figsize=(10, 6), verbose=False)    #najít optimální threshold
-    threshold1=threshold_otsu(data) 
-    for x in range(224):      
-        for y in range(224):
-            if data[x,y] >= threshold1:
-                data[x,y] = 1
-            else:
-                data[x,y] = 0
-    #plt.imshow(data,cmap="gray")
+    binar_data=binar(data)
     
     output =np.load('/Users/betyadamkova/Desktop/final/output/' + 'output' + str(it) +'.npy')
-    output=output[0,0,:,:]
-    threshold2= threshold_otsu(output)
-    for x in range(224):
-        for y in range(224):
-            if output[x,y] <= threshold2:
-                output[x,y] = 0
-            else:
-                output[x,y] = 1
-    #plt.imshow(output,cmap="gray")
-          
+    binar_output=binar(output)
+    
     TP = np.sum(((data==1) & (output ==1)).astype(np.float32))
     FN = np.sum(((data==1) & (output ==0)).astype(np.float32))
     TN = np.sum(((data==0) & (output ==0)).astype(np.float32))
@@ -65,9 +63,8 @@ for fin in range(70):
 
 fig = plt.figure()
 fig.add_subplot(1, 2, 1)   
-plt.imshow(data,cmap="gray")
+plt.imshow(binar_data,cmap="gray")
 fig.add_subplot(1, 2, 2)
-plt.imshow(output,cmap="gray")
+plt.imshow(binar_output,cmap="gray")
 
 print(final_sensitivity)
-  
