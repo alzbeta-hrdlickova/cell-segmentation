@@ -7,7 +7,12 @@ from skimage.morphology import extrema
 from skimage.measure import label
 from skimage import data, util, filters, color
 from skimage.feature import peak_local_max
-
+from skimage.filters import threshold_otsu
+from skimage.morphology import remove_small_objects
+from skimage.morphology import remove_small_holes
+from skimage.morphology import opening
+from skimage.morphology import disk
+from skimage import segmentation
 #marker controlled watershed - distační mapa, binár a seed -obracená distanční mapa se seedama, maska pro definici pozadí
 
 def binar(data):
@@ -20,10 +25,9 @@ def binar(data):
                 data[x,y] = 1
             else:
                 data[x,y] = 0
-    #return data
+    return data
 
 def edge_binar(labels):
-    
     for x in range(224):      
         for y in range(224):
             if labels[x,y] > 0:
@@ -46,12 +50,12 @@ def edge_data(edges1):
 it=69
 data =np.load('/Users/betyadamkova/Desktop/final/data/' + 'data' + str(it) +'.npy') 
 data=data[0,0,:,:]
+plt.imshow(data,cmap="gray")
 inverse_data=util.invert(data)              #inverzní distanšční mapa
 h1 = 0
 h1_maxima = extrema.h_maxima(data, h1)
 label_h_maxima1 = label(h1_maxima)
-plt.imshow(data,cmap="gray")
-binar_edge=edge_data(data)
+binar_edge=edge_data(data) 
 plt.imshow(binar_edge,cmap="gray")
 
 it=69
@@ -71,11 +75,11 @@ plt.imshow(label_h_maxima2,cmap=plt.cm.nipy_spectral)
 
 labels=watershed(inverse_data, label_h_maxima1, mask=binar_output)
 edges = filters.sobel(labels)
-#binar_edge=edge_binar(edges)
+output_edge=edge_binar(edges)
+#plt.imshow(output_edge,cmap="gray")
 
-fig, axes = plt.subplots(ncols=4, figsize=(17, 5), sharex=True, sharey=True)
+fig, axes = plt.subplots(ncols=4, figsize=(15, 4), sharex=True, sharey=True)
 ax = axes.ravel()
-
 ax[0].imshow(inverse_data, cmap=plt.cm.gray)
 ax[0].set_title('Inverzní distanční mapa')
 ax[0].axis('off')
@@ -85,29 +89,6 @@ ax[1].axis('off')
 ax[2].imshow(binar_edge, cmap=plt.cm.gray)
 ax[2].set_title('Edges data')
 ax[2].axis('off')
-ax[3].imshow(edges, cmap=plt.cm.gray)
+ax[3].imshow(output_edge, cmap=plt.cm.gray)
 ax[3].set_title('Output edge')
 ax[3].axis('off')
-
-
-
-##############################################################
-edges = filters.sobel(labels)
-plt.imshow(edges,cmap="gray")
-
-grid = util.regular_grid(data.shape, n_points=468)
-seeds = np.zeros(data.shape, dtype=int)
-
-seeds[grid] = np.arange(seeds[grid].size).reshape(seeds[grid].shape) + 1
-w0 = watershed(edges, seeds)
-w1 = watershed(edges, seeds, compactness=0.01)
-
-fig, (ax0, ax1) = plt.subplots(1, 2)
-
-ax0.imshow(color.label2rgb(w0, data, bg_label=-1))
-ax0.set_title('Classical watershed')
-
-ax1.imshow(color.label2rgb(w1, data, bg_label=-1))
-ax1.set_title('Compact watershed')
-
-plt.show()
