@@ -2,14 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.filters import try_all_threshold
 from skimage.filters import threshold_otsu
-from scipy import ndimage as ndi
-
-from skimage.segmentation import watershed
-from skimage.feature import peak_local_max
-
 
 def binar(data):
-    data=data[0,0,:,:]
     #fig, ax = try_all_threshold(data, figsize=(10, 6), verbose=False)    #najít optimální threshold
     threshold=threshold_otsu(data)
     for x in range(224):      
@@ -32,9 +26,11 @@ for fin in range(70):
     print(it)
 
     data =np.load('/Users/betyadamkova/Desktop/final/data/' + 'data' + str(it) +'.npy') 
+    data=data[0,0,:,:]
     binar_data=binar(data)
     
     output =np.load('/Users/betyadamkova/Desktop/final/output/' + 'output' + str(it) +'.npy')
+    output=output[0,0,:,:]
     binar_output=binar(output)
     
     TP = np.sum(((data==1) & (output ==1)).astype(np.float32))
@@ -67,4 +63,10 @@ plt.imshow(binar_data,cmap="gray")
 fig.add_subplot(1, 2, 2)
 plt.imshow(binar_output,cmap="gray")
 
-print(final_sensitivity)
+print("Sensitivity =", final_sensitivity)
+print("Specificity =", final_specificity)
+print("Accuracy =", final_accuracy)
+print("Dice =", final_dice)
+print("Jaccard =", final_jaccard)
+
+  
