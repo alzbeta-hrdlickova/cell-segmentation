@@ -7,8 +7,8 @@ from Unet import Unet
 from torch.utils import data
 from torch.utils.data import random_split
 
-#model neuronové sítě, učení, validace a testování modelu
-#čerpání informací z 11. cvičení MPC-MLR https://colab.research.google.com/drive/1-Wa6iWwK39Gxm_LptwalRGA_CwEDKXdG#scrollTo=l2aV6i_gaxrs
+"""model neuronové sítě, učení, validace a testování modelu, volání funkce DataLoader
+čerpání informací z 11. cvičení MPC-MLR https://colab.research.google.com/drive/1-Wa6iWwK39Gxm_LptwalRGA_CwEDKXdG#scrollTo=l2aV6i_gaxrs """
 
 batch=16
 
