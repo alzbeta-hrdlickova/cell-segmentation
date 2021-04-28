@@ -7,10 +7,13 @@ from Unet import Unet
 from torch.utils import data
 from torch.utils.data import random_split
 
+#model neuronové sítě, učení, validace a testování modelu
+#čerpání informací z 11. cvičení MPC-MLR https://colab.research.google.com/drive/1-Wa6iWwK39Gxm_LptwalRGA_CwEDKXdG#scrollTo=l2aV6i_gaxrs
+
 batch=16
 
 dataset = DataLoader(split="trenink")
-trainset, valset, test= random_split(dataset, [530,70,70])
+trainset, valset, test= random_split(dataset, [530,70,70])      #rozdělení dat na trénovací, validační a testovací
 #print(len(finaltestloader))  
 
 trainloader = torch.utils.data.DataLoader(
@@ -103,7 +106,7 @@ for epoch in range(12):
       plt.savefig('images/training_loss.png')
       plt.close("all")
 
-torch.save(net.state_dict(), '/home/ubmi/Documents/data_vse/model2.pt')
+torch.save(net.state_dict(), '/home/ubmi/Documents/data_vse/model.pt')
 
 print('Training finished!!!')
 
