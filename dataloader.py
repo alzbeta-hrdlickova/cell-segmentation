@@ -11,9 +11,10 @@ class DataLoader(data.Dataset):
     """Nacitani dat"""
 
     def __init__(self,split="trenink",path_to_data='/home/ubmi/Documents/data_vse',patch_size=[224,224]):
-                                      #bude asi potrebovat predelat velikost dle testovych dat - vyradit nevhodne
+                                      
         self.patch_size=patch_size
         self.split=split
+        
         #rozdělení do složek
         if self.split == 'trenink':
             self.slozky=glob.glob(path_to_data + '/stage1_train/*')
@@ -46,7 +47,7 @@ class DataLoader(data.Dataset):
             dist_map = ndimage.distance_transform_edt(maska_k)
             maska = maska + dist_map        #pricitani distancni mapy
             
-        #zmena velikosti obrazku, nahodny vyrezek, nejlepe stred pak
+        #zmena velikosti obrazku, vyrezek nejlepe stred
         if self.split=='trenink':
             r1=torch.randint(in_size[0]-out_size[0],(1,1)).view(-1).numpy()[0]
             r2=torch.randint(in_size[1]-out_size[1],(1,1)).view(-1).numpy()[0]
@@ -58,7 +59,7 @@ class DataLoader(data.Dataset):
         orig=orig[r[0]:r[0]+out_size[0],r[1]:r[1]+out_size[1],:]
         maska=maska[r[0]:r[0]+out_size[0],r[1]:r[1]+out_size[1]]    
          
-        #predela na float, [1,m,n] pro orig i masku
+        #predelani na float, [1,m,n] pro orig i masku
         image = torch.Tensor(maska.astype(np.float32).reshape((1,out_size[0],out_size[1])))
         image_orig=np.transpose(orig[:,:,0:3].astype(np.float32),(2,0,1))/255-0.5
         image_orig = torch.Tensor(image_orig)
