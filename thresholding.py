@@ -6,14 +6,15 @@ from skimage.filters import threshold_mean
 from skimage.filters import threshold_yen
 from skimage.filters import threshold_isodata
 
-def binar(data):
+def binar(img):
+    #fig, ax = try_all_threshold(output, figsize=(10, 9), verbose=False)    #najít vizuálně optimální threshold
     for x in range(224):      
         for y in range(224):
-            if data[x,y] >= threshold:
-                data[x,y] = 1
+            if img[x,y] >= threshold:
+                img[x,y] = 1
             else:
-                data[x,y] = 0
-    return data
+                img[x,y] = 0
+    return img
 
 sensitivity_set=[] 
 specificity_set=[]
@@ -81,6 +82,7 @@ for k in range (4):
             threshold=threshold_yen(output)
         else:
             threshold=threshold_isodata(output)
+            
         binar_output=binar(output)
         
         TP = np.sum(((data==1) & (output ==1)).astype(np.float32))      
@@ -171,4 +173,16 @@ print("Jaccard koeficient při Yen threshold =", yen_jaccard)
 print("Jaccard koeficient při Isodata threshold =", isodata_jaccard)
 J=(otsu_jaccard + mean_jaccard  + yen_jaccard + isodata_jaccard)/4
 print("Průměr vypočtených jaccard koeficientu:", J) 
-      
+
+
+
+fig, axes = plt.subplots(ncols=2, figsize=(15, 4), sharex=True, sharey=True)
+ax = axes.ravel()
+ax[0].imshow(binar_data, cmap=plt.cm.gray)
+ax[0].set_title('binar_data')
+ax[0].axis('off')
+ax[1].imshow(binar_output, cmap=plt.cm.nipy_spectral)
+ax[1].set_title('binar_output')
+ax[1].axis('off')
+     
+ 
