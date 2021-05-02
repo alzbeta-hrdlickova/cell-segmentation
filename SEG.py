@@ -1,20 +1,30 @@
-
-def SEEGacc (img, gt_mask, classes):
-    """ hodnocení kvality segmentace založené na Jaccard similarity index, zdroj informací https://public.celltrackingchallenge.net/documents/SEG.pdf
-        img. gt_mask v numpy array o stejné velikosti
-        classes - třída objektu-pozadi v np array (0,1)"""
+""" Funkce SEG - Evaluation of segmentation accuracy """
+def SEEGacc (img, gt_mask):
+    """ img. gt_mask as np array of the same size
+        classes - class of the object in the np array (fe 1))"""
     [row,col]=img.shape
     match=0
-    classcount_gtmask = (gt_mask == classes).sum()
-    classcount_img = (img == classes).sum()
+    classcount_gtmask=0
+    classcount_img =0
+    
     for r in range (0,row):
         for c in range (0,col):
-            if img[r,c]==gt_mask[r,c]:
+            if gt_mask [r,c]>=1:
+                classcount_gtmask=classcount_gtmask+1
+                
+            if img [r,c]>=1:
+                classcount_img=classcount_img+1
+    
+    
+    for r in range (0,row):
+        for c in range (0,col):
+            if img[r,c]>=1 and img[r,c]== gt_mask[r,c]:
                 match=match+1
 
-    if ~(classcount_gtmask>0.5*match):
-        acc=0
+
+    if match>0.5*classcount_gtmask:
+        acc=abs(match)/abs(((classcount_gtmask+classcount_img)-match))
     else:
-        acc=match/((classcount_gtmask+classcount_img)-match)
+        acc=0
 
     return acc
