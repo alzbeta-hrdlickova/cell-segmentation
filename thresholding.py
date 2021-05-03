@@ -5,16 +5,10 @@ from skimage.filters import threshold_otsu
 from skimage.filters import threshold_mean
 from skimage.filters import threshold_yen
 from skimage.filters import threshold_isodata
-
-def binar(img):
-    #fig, ax = try_all_threshold(output, figsize=(10, 9), verbose=False)    #najít vizuálně optimální threshold
-    for x in range(224):      
-        for y in range(224):
-            if img[x,y] >= threshold:
-                img[x,y] = 1
-            else:
-                img[x,y] = 0
-    return img
+from skimage import img_as_bool
+from skimage import img_as_float
+from skimage.morphology import remove_small_holes
+from skimage.morphology import remove_small_objects
 
 sensitivity_set=[] 
 specificity_set=[]
@@ -60,17 +54,9 @@ for k in range (4):
         #print(it)
     
         data =np.load('/Users/betyadamkova/Desktop/final/data/' + 'data' + str(it) +'.npy') 
-        data=data[0,0,:,:]
-        if kk == 1:
-            threshold=threshold_otsu(data)
-        elif kk ==2:
-            threshold=threshold_mean(data)
-        elif kk ==3:
-            threshold=threshold_yen(data)
-        else:
-            threshold=threshold_isodata(data)
-            
-        binar_data=binar(data)
+        data=data[0,0,:,:]   
+        data=data>0
+        data=img_as_float(data)
         
         output =np.load('/Users/betyadamkova/Desktop/final/output/' + 'output' + str(it) +'.npy')
         output=output[0,0,:,:]
@@ -82,13 +68,17 @@ for k in range (4):
             threshold=threshold_yen(output)
         else:
             threshold=threshold_isodata(output)
-            
-        binar_output=binar(output)
         
-        TP = np.sum(((data==1) & (output ==1)).astype(np.float32))      
-        FN = np.sum(((data==1) & (output ==0)).astype(np.float32))      
-        TN = np.sum(((data==0) & (output ==0)).astype(np.float32))
-        FP = np.sum(((data==0) & (output ==1)).astype(np.float32))    
+        binar_output = output > threshold
+        pokus = remove_small_holes(remove_small_objects(binar_output, 50),50)
+        plt.imshow(binar_output,cmap="gray")
+        
+        output=img_as_float(pokus)
+        
+        TP = np.sum(((data==1) & (output ==1)).astype(np.float64))      
+        FN = np.sum(((data==1) & (output ==0)).astype(np.float64))      
+        TN = np.sum(((data==0) & (output ==0)).astype(np.float64))
+        FP = np.sum(((data==0) & (output ==1)).astype(np.float64))    
             
         sensitivity = TP / (TP + FN)        
         specificity = TN / (TN + FP)
@@ -175,14 +165,13 @@ J=(otsu_jaccard + mean_jaccard  + yen_jaccard + isodata_jaccard)/4
 print("Průměr vypočtených jaccard koeficientu:", J) 
 
 
-
 fig, axes = plt.subplots(ncols=2, figsize=(15, 4), sharex=True, sharey=True)
 ax = axes.ravel()
-ax[0].imshow(binar_data, cmap=plt.cm.gray)
-ax[0].set_title('binar_data')
+ax[0].imshow(data, cmap=plt.cm.gray)
+ax[0].set_title('binární maska')
 ax[0].axis('off')
 ax[1].imshow(binar_output, cmap=plt.cm.nipy_spectral)
-ax[1].set_title('binar_output')
+ax[1].set_title('binární získaný snímek')
 ax[1].axis('off')
      
  
