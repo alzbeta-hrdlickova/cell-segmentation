@@ -10,20 +10,19 @@ def SEEGacc (wat, maska):
     acc=0
     JaccIn=[]
     jaccard=[]
-    pocet_bunek= (np.amax(maska)).astype(np.int)         #počet buněk
-    pocet_bunek2=np.amax(wat)
+    pocet_bunek= (np.amax(maska)).astype(np.int)        #počet buněk - nejvyšší očíslovaná bunka
+    pocet_bunek2=(np.amax(wat)).astype(np.int)
     pomoc=maska
     pomoc2=wat
     
-    for r in range (1,pocet_bunek+1):     
-        for c in range (1,pocet_bunek2+1): 
-            #print('r:',r)
+    for r in range (1,pocet_bunek+1):  
+        for c in range (1,pocet_bunek2 +1): 
 
             maska=(maska!=r)==0              #nahrazení ostatních buněk nulou
             #plt.imshow(maska,cmap="gray")
             maska=img_as_float(maska)       #jedna bunka oznacena 1
             pocet1=np.sum(maska)            #počet pixelu bunky
-                
+            
             wat=(wat!=c)==0 
             wat=img_as_float(wat)
             #plt.imshow(wat,cmap="gray")
@@ -46,7 +45,10 @@ def SEEGacc (wat, maska):
             acc=0
             
         jaccard.append(max(JaccIn))
-        #print(max(JaccIn) )
+        #print(max(JaccIn))
         JaccIn=[]
         
-    return sum(jaccard)/(pocet_bunek)
+    if pocet_bunek ==0:
+        return 0
+    else: 
+        return sum(jaccard)/(pocet_bunek)
