@@ -1,30 +1,52 @@
 """ Funkce SEG - Evaluation of segmentation accuracy """
-def SEEGacc (img, gt_mask):
-    """ img. gt_mask as np array of the same size
-        classes - class of the object in the np array (fe 1))"""
-    [row,col]=img.shape
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage import img_as_float
+
+def SEEGacc (wat, maska):
+
+    [row,col]=maska.shape
     match=0
-    classcount_gtmask=0
-    classcount_img =0
+    acc=0
+    JaccIn=[]
+    jaccard=[]
+    pocet_bunek= (np.amax(maska)).astype(np.int)         #počet buněk
+    pocet_bunek2=np.amax(wat)
+    pomoc=maska
+    pomoc2=wat
     
-    for r in range (0,row):
-        for c in range (0,col):
-            if gt_mask [r,c]>=1:
-                classcount_gtmask=classcount_gtmask+1
+    for r in range (1,pocet_bunek+1):     
+        for c in range (1,pocet_bunek2+1): 
+            #print('r:',r)
+
+            maska=(maska!=r)==0              #nahrazení ostatních buněk nulou
+            #plt.imshow(maska,cmap="gray")
+            maska=img_as_float(maska)       #jedna bunka oznacena 1
+            pocet1=np.sum(maska)            #počet pixelu bunky
                 
-            if img [r,c]>=1:
-                classcount_img=classcount_img+1
-    
-    
-    for r in range (0,row):
-        for c in range (0,col):
-            if img[r,c]>=1 and img[r,c]== gt_mask[r,c]:
-                match=match+1
-
-
-    if match>0.5*classcount_gtmask:
-        acc=abs(match)/abs(((classcount_gtmask+classcount_img)-match))
-    else:
-        acc=0
-
-    return acc
+            wat=(wat!=c)==0 
+            wat=img_as_float(wat)
+            #plt.imshow(wat,cmap="gray")
+            pocet2=np.sum(wat)
+            
+            for k in range (0,row):
+                for l in range (0,col):
+                    if maska[k,l]== 1 and maska[k,l] == wat[k,l]:
+                        match=match+1
+                        
+                        if match>0.5*pocet2:
+                            acc=abs(match)/abs(((pocet1+pocet2)-match))
+                        else:
+                            acc=0
+                            
+            JaccIn.append(acc)
+            maska=pomoc
+            wat=pomoc2
+            match=0
+            acc=0
+            
+        jaccard.append(max(JaccIn))
+        #print(max(JaccIn) )
+        JaccIn=[]
+        
+    return sum(jaccard)/(pocet_bunek)
