@@ -35,9 +35,7 @@ for fin in range(70):
     binar_data=img_as_float(binar_data)
     label_h_maxima1 = label(binar_data)        #označení buněk
     plt.imshow(label_h_maxima1,cmap=plt.cm.nipy_spectral)
-    #data_edge=data==1               #okraje buněk
-    #data_edge=remove_small_holes(remove_small_objects(data_edge, 1), 1)
-    #plt.imshow(data_edge,cmap="gray")
+
     
     output =np.load('/Users/betyadamkova/Desktop/final/output/' + 'output' + str(it) +'.npy') 
     output=output[0,0,:,:]
@@ -55,9 +53,12 @@ for fin in range(70):
     plt.imshow(labels,cmap=plt.cm.nipy_spectral)
     
     
-    ###########random walker for segmentation
-    label_h_maxima2[~binar_output] = -1
-    labels_rw = random_walker(binar_output, label_h_maxima2, beta=10, mode='bf')
+    ###########random walker segmentation
+    h2 =0.05    
+    h2_maxima = extrema.h_maxima(output, h2)
+    marker2  = label(h2_maxima)
+    marker2[~binar_output] = -1
+    labels_rw = random_walker(binar_output, marker2, beta=10, mode='bf')
     plt.imshow(labels_rw,cmap=plt.cm.nipy_spectral)
     
     properties = measure.regionprops(labels_rw)
@@ -68,7 +69,7 @@ for fin in range(70):
     overlay_h = color.label2rgb(labels, data, alpha=0.7, bg_label=0, bg_color=None, colors=[(1, 0, 0)],image_alpha=1)
     #plt.imshow(overlay_h,cmap="gray");plt.axis ('off')
     
-####################
+################################################################################
     seg_score=SEEGacc(labels, label_h_maxima1)
     SEGS.append(seg_score)
     #print("SEG:", seg_score) 
