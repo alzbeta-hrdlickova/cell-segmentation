@@ -14,14 +14,13 @@ batch=16
 
 dataset = DataLoader(split="trenink")
 trainset, valset, test= random_split(dataset, [530,70,70])      #rozdělení dat na trénovací, validační a testovací
-#print(len(finaltestloader))  
 
 trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=batch, num_workers=0, shuffle=True, drop_last=True)
+    trainset, batch_size=batch, num_workers=4, shuffle=True, drop_last=True)
 testloader = torch.utils.data.DataLoader(
-    valset, batch_size=batch, num_workers=0, shuffle=True, drop_last=True)
+    valset, batch_size=batch, num_workers=2, shuffle=True, drop_last=True)
 finaltestloader = torch.utils.data.DataLoader(
-    test, batch_size=batch, num_workers=0, shuffle=True, drop_last=True)  
+    test, batch_size=1, num_workers=1, shuffle=True, drop_last=True)  
 
 net=Unet().cuda()
 net.requires_grad=True
@@ -48,7 +47,7 @@ for epoch in range(12):
     data.requires_grad=True
     lbl.requires_grad=True
     
-    optimizer.zero_grad()   # zero the gradient buffers
+    optimizer.zero_grad()   # nulovani gradientu
     net.train()
     output=net(data)
     
@@ -58,7 +57,7 @@ for epoch in range(12):
     
     train_loss_tmp.append(loss.detach().cpu().numpy())
     
-    if it%50==0:
+    if it%20==0:
                   
       fig = plt.figure()
       fig.add_subplot(1, 3, 1)
@@ -88,23 +87,23 @@ for epoch in range(12):
           plt.imshow(lbl[0, 0, :, :].detach().cpu().numpy(), cmap="gray")
                 
       
-      train_loss.append(np.mean(train_loss_tmp))
-      test_loss.append(np.mean(test_loss_tmp))
-      position.append(it)
+  train_loss.append(np.mean(train_loss_tmp))
+  test_loss.append(np.mean(test_loss_tmp))
+  position.append(epoch)
       
-      train_loss_tmp=[]
-      test_loss_tmp=[]
+  train_loss_tmp=[]
+  test_loss_tmp=[]
       
-      fig = plt.figure()
-      plt.plot(position,train_loss, label="training loss")   #oznaceni legendy
-      plt.plot(position,test_loss,label="validation loss")
-      plt.legend()
-      plt.ylabel('Chybová funkce')  #označení os
-      plt.xlabel('Počet obrázků')
-      plt.show()
+  fig = plt.figure()
+  plt.plot(position,train_loss, label="chyba při učení")   #oznaceni legendy
+  plt.plot(position,test_loss,label="validační chyba")
+  plt.legend()
+  plt.ylabel('Chybová funkce')  #označení os
+  plt.xlabel('Počet epoch')
+  plt.show()
       
-      plt.savefig('images/training_loss.png')
-      plt.close("all")
+  plt.savefig('images/training_loss.png')
+  plt.close("all")
 
 torch.save(net.state_dict(), '/home/ubmi/Documents/data_vse/model.pt')
 
