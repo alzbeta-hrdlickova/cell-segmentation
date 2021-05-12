@@ -4,7 +4,6 @@ import torch.nn.functional as F
 import numpy as np
 from torch.nn import init
 
-
 class unetConv2(nn.Module):
     def __init__(self, in_size, out_size,filter_size=3,stride=1,pad=1,do_batch=1):
         super().__init__()
