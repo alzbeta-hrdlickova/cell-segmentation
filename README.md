@@ -1,3 +1,3 @@
-# Cell segmentation using convolutional neural netwokr
+# Cell segmentation using convolutional neural network
 
 
