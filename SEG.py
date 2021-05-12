@@ -1,10 +1,12 @@
-""" Funkce SEG - Evaluation of segmentation accuracy """
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import img_as_float
 
-def SEEGacc (wat, maska):
+""" Funkce SEG - Evaluation of segmentation accuracy 
+    výpočet podobnosti buňky v masce s každou buňkou v segmentovaném obraze, zachování největší podobnosti, 
+    vždy jen jedna, díky pravidlu, že shoda je větší jak polovina porovnávané buňky"""
 
+def SEEGacc (wat, maska):
     [row,col]=maska.shape
     match=0
     acc=0
@@ -19,9 +21,9 @@ def SEEGacc (wat, maska):
         for c in range (1,pocet_bunek2 +1): 
 
             maska=(maska!=r)==0              #nahrazení ostatních buněk nulou
+            maska=img_as_float(maska)        #jedna buňka oznacena 1
             #plt.imshow(maska,cmap="gray")
-            maska=img_as_float(maska)       #jedna bunka oznacena 1
-            pocet1=np.sum(maska)            #počet pixelu bunky
+            pocet1=np.sum(maska)            #počet pixelu buňky
             
             wat=(wat!=c)==0 
             wat=img_as_float(wat)
@@ -45,10 +47,9 @@ def SEEGacc (wat, maska):
             acc=0
             
         jaccard.append(max(JaccIn))
-        #print(max(JaccIn))
         JaccIn=[]
         
-    if pocet_bunek ==0:
+    if pocet_bunek ==0:             #pokud na snímku není žádná buňka, výsledek SEG=0
         return 0
     else: 
         return sum(jaccard)/(pocet_bunek)
