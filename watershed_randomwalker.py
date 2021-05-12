@@ -65,7 +65,7 @@ for fin in range(70):
     #print([prop.area for prop in properties_labels])
     #print([prop.area for prop in properties_rw])
 
-    ################# vyhodnocení segmentace watershed - marker, random walker a binární obrazy
+    ################# vyhodnocení segmentace pomocí funkce SEG
     seg_score=SEEGacc(labels, label_data)
     SEGS_w.append(seg_score)
     print("SEG_w:", seg_score) 
