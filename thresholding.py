@@ -7,9 +7,9 @@ from skimage.morphology import remove_small_objects
 '''prahování predikovaného snímku, výpočet hodnot Senzitivity, Specificity, Accuracy, Dice koeficientu a Jaccard koeficientu
     nastavení prahů, výpočet hodnot a získání nejlepších výsledků dle Jaccard koeficinetu  '''
     
-prah1=-0.25
-prah1=-0.26
-prah1=-0.27
+prah1=1.2
+prah2=1.3
+prah3=1.4
 
 sensitivity_set=[] 
 specificity_set=[]
@@ -29,24 +29,24 @@ for kk in range(3):
     for fin in range(70):
         it+=1
         
-        data =np.load('/Users/betyadamkova/Desktop/final/test - model5/data/' + 'data' + str(it) +'.npy') 
+        data =np.load('/Users/betyadamkova/Desktop/final/model 8/lbl/' + 'lbl' + str(it) +'.npy') 
         data=data[0,0,:,:]   
-        data=data>0
+        data=data>1
         data=img_as_float(data)                          #binární maska
         #plt.imshow(data,cmap="gray")
         
-        output =np.load('/Users/betyadamkova/Desktop/final/test - model5/output/' + 'output' + str(it) +'.npy')
-        output=output[0,0,:,:]
-        #plt.imshow(output,cmap="gray")
+        output =np.load('/Users/betyadamkova/Desktop/final/model 8/output/' + 'output' + str(it) +'.npy')
+        binar_output=output[0,0,:,:]
+        #plt.imshow(binar_output,cmap="gray")
         
-        if kk ==1:
-            binar_output = output>prah1
-        elif kk==2:
-            binar_output = output>prah2
-        elif kk == 3:
-            binar_output = output>prah3
+        if kk ==0:
+            binar_output = binar_output>prah1
+        elif kk==1:
+            binar_output = binar_output>prah2
+        elif kk ==2:
+            binar_output = binar_output>prah3
         
-        binar_output = remove_small_holes(remove_small_objects(binar_output, 3),1200)
+        binar_output = remove_small_holes(remove_small_objects(binar_output, 15),1200)
         output=img_as_float(binar_output)                    #binární predikovaný obraz
         
         TP = np.sum(((data==1) & (output ==1)).astype(np.float64))     
@@ -84,19 +84,19 @@ for kk in range(3):
         final_dice=sum(dice_set)/70
         final_jaccard=sum(jaccard_set)/70
         
-        if kk ==1:
+        if kk ==0:
              prah1_sensitivity = final_sensitivity
              prah1_specificity=final_specificity
              prah1_accuracy=final_accuracy
              prah1_dice=final_dice
              prah1_jaccard=final_jaccard
-        elif kk ==2:
+        elif kk ==1:
              prah2_sensitivity=final_sensitivity
              prah2_specificity=final_specificity
              prah2_accuracy=final_accuracy
              prah2_dice=final_dice
              prah2_jaccard=final_jaccard
-        elif kk ==3:
+        elif kk ==2:
              prah3_sensitivity=final_sensitivity
              prah3_specificity=final_specificity
              prah3_accuracy=final_accuracy
@@ -129,8 +129,8 @@ elif prah3_jaccard == np.amax([prah1_jaccard, prah2_jaccard, prah3_jaccard]):
 fig, axes = plt.subplots(ncols=2, figsize=(15, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 ax[0].imshow(data, cmap=plt.cm.gray)
-ax[0].set_title('binar_data')
+ax[0].set_title('binární maska')
 ax[0].axis('off')
 ax[1].imshow(output, cmap=plt.cm.gray)
-ax[1].set_title('binar_output')
+ax[1].set_title('binaární predikovaný snímek')
 ax[1].axis('off')
