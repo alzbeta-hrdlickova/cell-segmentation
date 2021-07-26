@@ -11,7 +11,7 @@ from SEG import SEEGacc
 from skimage.segmentation import random_walker
 from skimage import measure
 
-''' segmentace predikovaných obrazů pomocí metody rozvodí kontrolované markery a metody náhodého chodce
+''' segmentace predikovaných obrazů pomocí metody rozvodí kontrolovaným markery a metody náhodého chodce
     vyhodnocení segmentace pomocí funkce SEG '''
 
 SEGS_w=[]
@@ -23,49 +23,50 @@ for fin in range(70):
     it+=1
     print(it)
 
-    data =np.load('/Users/betyadamkova/Desktop/final/test - model5/data/' + 'data' + str(it) +'.npy') 
+    data =np.load('/Users/betyadamkova/Desktop/final/model 8/ss/lbl/' + 'lbl' + str(it) +'.npy') 
     data=data[0,0,:,:]                                     
-    binar_data=data>0
-    #binar_data=img_as_float(binar_data)
+    binar_data=data>1
+    binar_data=img_as_float(binar_data)
     label_data = label(binar_data)                                      #označení buněk v masce
     #plt.imshow(label_data,cmap=plt.cm.nipy_spectral)
      
-    output =np.load('/Users/betyadamkova/Desktop/final/test - model5/output/' + 'output' + str(it) +'.npy') 
+    output =np.load('/Users/betyadamkova/Desktop/final/model 8/ss/output/' + 'output' + str(it) +'.npy') 
     output=output[0,0,:,:]
-    inverse_output=util.invert(output)                                  #inverzní distanšní mapa 
-    binar_output=output > -0.26                       
-    binar_output=remove_small_holes(remove_small_objects(binar_output, 3),1200) 
+    inverse_output=util.invert(output)                                  #inverzní distanšní mapa (predikovaný snímek) 
+    binar_output=output > 1.34                       
+    binar_output=remove_small_holes(remove_small_objects(binar_output, 15),1200)
     #plt.imshow(inverse_output,cmap="gray")
     
     ################### marker controlled watershed
-    h =0.02                                                             #h= minimální výška extrahovaných maxim
+    h =0.2                                                              #h= minimální výška extrahovaných maxim
     h_maxima = extrema.h_maxima(output, h)                              #nalezení středu buněk
     marker  = label(h_maxima)                                           #označení stredu buněk
-    #plt.imshow(h_maxima,cmap="gray")                                     
+    plt.imshow(h_maxima,cmap="gray")                                     
     labels=watershed(inverse_output, marker, mask=binar_output)         #vstup do funkce: inverní distanční mapa, označené středy, binární
     #plt.imshow(labels,cmap=plt.cm.nipy_spectral)
     
     ################ random walker segmentation
-    h =0.02
+    h =0.2
     h_maxima = extrema.h_maxima(output, h)            #středy buněk 
     marker2  = label(h_maxima)                         #označení buněk
     marker2[~binar_output] = -1                         #bunky=0, okoli=-1, středy buněk označené
-    #plt.imshow(marker2,cmap="gray")                        
+    plt.imshow(marker2,cmap="gray")       
+                 
     if (np.amax(marker2)).astype(np.int)==-1:           #pokud na obrazu není žádná buňka, random walker nelze volat
         labels_rw=binar_output
     else:
         labels_rw = random_walker(binar_output, marker2, beta=24, mode='bf')
     #plt.imshow(labels_rw,cmap=plt.cm.nipy_spectral)
 
-    ################ měření velikosti označených buněk
-    properties_maska = measure.regionprops(label_data)
-    properties_rw = measure.regionprops(labels_rw)
-    properties_labels = measure.regionprops(labels)
+    ################ měření velikosti segmentovaných buněk
+    properties_maska = measure.regionprops(label_data)   #měření velikosti označených buněk
+    properties_rw = measure.regionprops(labels_rw)          ##měření velikosti random walker
+    properties_labels = measure.regionprops(labels)         ##měření velikosti watershed
     #print([prop.area for prop in properties_maska])
     #print([prop.area for prop in properties_labels])
-    #print([prop.area for prop in properties_rw])
+    #print([prop.area for prop in properties_rw])'''
 
-    ################# vyhodnocení segmentace pomocí funkce SEG
+    ################# vyhodnocení segmentace watershed - marker, random walker a binární obrazy
     seg_score=SEEGacc(labels, label_data)
     SEGS_w.append(seg_score)
     print("SEG_w:", seg_score) 
