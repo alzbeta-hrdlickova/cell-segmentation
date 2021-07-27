@@ -38,7 +38,6 @@ class unetConvT2(nn.Module):
         outputs=F.relu(outputs)
         return outputs
     
-
 class unetUp(nn.Module):
     def __init__(self, in_size, out_size):
         super(unetUp, self).__init__()
@@ -52,15 +51,13 @@ class unetUp(nn.Module):
 
         return torch.cat([inputs1, inputs2], 1)
 
-
 class Unet(nn.Module):
     def __init__(self, filters=[16, 32, 64],in_size=1,out_size=1):
         super().__init__()
         
         self.out_size = out_size
         
-        self.filters = filters
-        
+        self.filters = filters    
         
         self.conv1 = nn.Sequential(unetConv2(in_size, filters[0]),unetConv2(filters[0], filters[0]),unetConv2(filters[0], filters[0]))
 
@@ -73,20 +70,16 @@ class Unet(nn.Module):
         if len(filters)>=5:
             self.conv4 = nn.Sequential(unetConv2(filters[2], filters[3] ),unetConv2(filters[3], filters[3] ),unetConv2(filters[3], filters[3] ))
 
-
         self.center = nn.Sequential(unetConv2(filters[-2], filters[-1] ),unetConv2(filters[-1], filters[-1] ))
 
         # upsampling
         if len(filters)>=5:
             self.up_concat4 = unetUp(filters[4], filters[4] )
             self.up_conv4=nn.Sequential(unetConv2(filters[3]+filters[4], filters[3] ),unetConv2(filters[3], filters[3] ))
-
         
         if len(filters)>=4:
             self.up_concat3 = unetUp(filters[3], filters[3] )
             self.up_conv3=nn.Sequential(unetConv2(filters[2]+filters[3], filters[2] ),unetConv2(filters[2], filters[2] ))
-
-
 
         if len(filters)>=3:
             self.up_concat2 = unetUp(filters[2], filters[2] )
@@ -94,23 +87,17 @@ class Unet(nn.Module):
 
 
         self.up_concat1 = unetUp(filters[1], filters[1])
-        self.up_conv1=nn.Sequential(unetConv2(filters[0]+filters[1], filters[0] ),unetConv2(filters[0], filters[0],do_batch=0 ))
-        
-        
+        self.up_conv1=nn.Sequential(unetConv2(filters[0]+filters[1], filters[0] ),unetConv2(filters[0], filters[0],do_batch=0 ))     
         
         self.final = nn.Conv2d(filters[0], self.out_size, 1)
-        
-
         
         for i, m in enumerate(self.modules()):
             if isinstance(m, nn.Conv2d):
                 init.xavier_normal_(m.weight)
-                init.constant_(m.bias, 0)
-            
+                init.constant_(m.bias, 0)           
      
     def forward(self, inputs):
         
-
         conv1 = self.conv1(inputs)
         x = F.max_pool2d(conv1,2,2)
 
@@ -143,7 +130,6 @@ class Unet(nn.Module):
         x = self.up_concat1(conv1, x)
         x=self.up_conv1(x)
         
-
         x = self.final(x)
         
 #        x=torch.tanh(x)
