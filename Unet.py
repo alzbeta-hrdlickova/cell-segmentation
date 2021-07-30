@@ -24,7 +24,7 @@ class unetConv2(nn.Module):
         if self.do_batch:
             outputs = self.bn(outputs)          
         outputs=F.relu(outputs)
-        outputs = self.do(outputs)
+        outputs = self.do(outputs)  #aktivace dropout vrstvy
 
         return outputs
 
