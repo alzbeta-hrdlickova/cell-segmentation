@@ -61,7 +61,7 @@ class DataLoader(data.Dataset):
          
         #predelani na float, [1,m,n] pro orig i masku
         image = torch.Tensor(maska.astype(np.float32).reshape((1,out_size[0],out_size[1])))
-        image_orig=np.transpose(orig[:,:,0:3].astype(np.float32),(2,0,1))/255-0.5
+        image_orig=np.transpose(orig[:,:,0:1].astype(np.float32),(2,0,1))/255-0.5
         image_orig = torch.Tensor(image_orig)
     
         return image,image_orig
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         tmp=np.transpose(orig.numpy()[0,:,:,:],[1,2,0])
         fig = plt.figure()
         fig.add_subplot(1, 2, 1)
-        plt.imshow(tmp+0.5)
+        plt.imshow(tmp+0.5,,cmap="gray")
         fig.add_subplot(1, 2, 2)
         plt.imshow(mask[0,0,:,:],cmap="gray")
         
