@@ -8,7 +8,7 @@ from torch.utils.data import random_split
 import torch.nn as nn
 
 """model neuronové sítě, učení, validace a testování modelu, volání funkce DataLoader
-čerpání informací z 11. cvičení MPC-MLR https://colab.research.google.com/drive/1-Wa6iWwK39Gxm_LptwalRGA_CwEDKXdG#scrollTo=l2aV6i_gaxrs """
+čerpání informací z 11. cvičení MPC-MLR """
 
 batch=16
 
