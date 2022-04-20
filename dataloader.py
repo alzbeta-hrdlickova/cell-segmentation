@@ -10,14 +10,17 @@ from scipy import ndimage
 class DataLoader(data.Dataset):
     """Nacitani dat"""
 
-    def __init__(self,split="trenink",path_to_data='/home/ubmi/Documents/data_vse',patch_size=[224,224]):
+    def __init__(self,split="trenink",path_to_data='C:/Users/hrdli/Desktop/DP/data_vse'):
                                       
-        self.patch_size=patch_size
         self.split=split
         
         #rozdělení do složek
         if self.split == 'trenink':
             self.slozky=glob.glob(path_to_data + '/stage1_train/*')
+        elif self.split == 'val':
+            self.slozky=glob.glob(path_to_data + '/val/*')
+        elif self.split == 'test':
+            self.slozky=glob.glob(path_to_data + '/test/*')
                  
         self.maska_list=[]
         self.orig_list=[] 
@@ -39,20 +42,22 @@ class DataLoader(data.Dataset):
         maska = np.zeros((orig.shape[0],orig.shape[1])) 
         #print(self.orig_list[idx])
         
-        out_size=self.patch_size
-        in_size=orig.shape
+        self.patch_size=[224,224]
         
         for k in nazev_maska:           
             maska_k = imread(k)             #nacteni kazde k-te masky
             dist_map = ndimage.distance_transform_edt(maska_k)
             maska = maska + dist_map        #pricitani distancni mapy
             
-        #zmena velikosti obrazku, vyrezek nejlepe stred
-        if self.split=='trenink':
+        #zmena velikosti obrazku 
+        if self.split=='trenink' or self.split=='val':
+            out_size=self.patch_size
+            in_size=orig.shape
             r1=torch.randint(in_size[0]-out_size[0],(1,1)).view(-1).numpy()[0]
             r2=torch.randint(in_size[1]-out_size[1],(1,1)).view(-1).numpy()[0]
             r=[r1,r2]
         else:
+            out_size=orig.shape
             r=[0,0]
         
         #vyindexovani obrazku
@@ -66,15 +71,14 @@ class DataLoader(data.Dataset):
     
         return image,image_orig
 
-if __name__ == "__main__":
-    #volani fce a vykresleni
+if __name__ == "__main__":              #volani fce a vykresleni
     loader = DataLoader(split='trenink')
     trainloader = data.DataLoader(loader,batch_size=2, num_workers=0, shuffle=True,drop_last=True) 
     for it,(mask,orig) in enumerate(trainloader):
         tmp=np.transpose(orig.numpy()[0,:,:,:],[1,2,0])
         fig = plt.figure()
         fig.add_subplot(1, 2, 1)
-        plt.imshow(tmp+0.5,,cmap="gray")
+        plt.imshow(tmp+0.5,cmap="gray")
         fig.add_subplot(1, 2, 2)
         plt.imshow(mask[0,0,:,:],cmap="gray")
         
