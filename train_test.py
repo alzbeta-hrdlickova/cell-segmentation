@@ -1,26 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+
 from dataloader import DataLoader
 from Unet import Unet
 from torch.utils import data
-from torch.utils.data import random_split
-import torch.nn as nn
 
-"""model neuronové sítě, učení, validace a testování modelu, volání funkce DataLoader
-čerpání informací z 11. cvičení MPC-MLR """
+""" model neuronové sítě, učení, validace a testování modelu, volání funkce DataLoader
+    čerpání informací z 11. cvičení MPC-MLR """
 
 batch=16
 
 dataset = DataLoader(split="trenink")
-trainset, valset, test= random_split(dataset, [530,70,70])   #rozdělení dat na trénovací, validační a testovací 
+valset = DataLoader(split="val")
+test = DataLoader(split="test")
 
 trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=batch, num_workers=1, shuffle=True, drop_last=True)
+    dataset, batch_size=batch, num_workers=2, shuffle=True, drop_last=True)   
 testloader = torch.utils.data.DataLoader(
-    valset, batch_size=batch, num_workers=1, shuffle=True, drop_last=True)
+    valset, batch_size=batch, num_workers=2, shuffle=True, drop_last=True)
 finaltestloader = torch.utils.data.DataLoader(
-    test, batch_size=1, num_workers=1, shuffle=True, drop_last=True)  
+    test, batch_size=1, num_workers=2, shuffle=True, drop_last=True)  
 
 net=Unet().cpu()
 net.requires_grad=True
@@ -37,10 +37,10 @@ test_loss_tmp=[]
 
 if __name__ == "__main__":   
     it=-1
-    for epoch in range(40):
+    for epoch in range(100):
       for k,(data,lbl) in enumerate(trainloader):       
         it+=1
-        print(it)
+        print(it)           #data=maska, lbl =puvodni
         
         data=data.cpu()
         lbl=lbl.cpu()
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         net.train()
         output=net(lbl)
         
-        loss=torch.mean((data-output)**2)     #nn.MSELoss(output,data)
+        loss=torch.mean((data-output)**2)     #MSE
         loss.backward()     #vypocet gradientu
         optimizer.step()    #aktualizace parametru
         
@@ -81,23 +81,22 @@ if __name__ == "__main__":
       plt.plot(position,train_loss, label="chyba při učení")   #oznaceni legendy
       plt.plot(position,test_loss,label="validační chyba")
       plt.legend()
-      plt.ylabel('Chybová funkce')  #označení os
+      plt.ylabel('Chybová funkce mse')  #označení os
       plt.xlabel('Epocha')
       plt.show()
           
-      plt.savefig('images/training_loss.png')
+      plt.savefig('C:/Users/hrdli/Desktop/DP/data_vse/images/training_loss.png')
       plt.close("all")
 
-torch.save(net.state_dict(), 'C:/Users/HP/Desktop/Bety/python/images/model10.pt')
+torch.save(net.state_dict(), 'C:/Users/hrdli/Desktop/DP/data_vse/images/model.pt')
 
-print('Training finished!!!')
+print('Trénování dokončeno!!!')
 
-################################################################# testování
+################################################################# testování modelu
 device = torch.device("cpu")
 net = Unet()                                           #instancování třídy vytvořené v modelu
-net.load_state_dict(torch.load('C:/Users/HP/Desktop/Bety/python/images/model9.pt',map_location=torch.device('cpu')))  #volání natrénovaného modelu
+net.load_state_dict(torch.load('C:/Users/hrdli/Desktop/DP/data_vse/images/model.pt',map_location=torch.device('cpu')))  #volání natrénovaného modelu
 net=net.to(device)
-#my_model = net.load_state_dict(torch.load('C:/Users/HP/Desktop/Bety/python/images/model.pt', map_location=torch.device('cpu')))
 
 if __name__ == "__main__":
     it=-1
@@ -120,9 +119,10 @@ if __name__ == "__main__":
       
         #prevest na np array,ulozit
         data = data.data.cpu().numpy()
-        np.save('images/data/data'+ str(it), data)
+        np.save('C:/Users/hrdli/Desktop/DP/data_vse/images/data/data'+ str(it), data)
         output = output.data.cpu().numpy()
-        np.save('images/output/output' + str(it), output)
+        np.save('C:/Users/hrdli/Desktop/DP/data_vse/images/output/output' + str(it), output)
         lbl = lbl.data.cpu().numpy()
-        np.save('images/lbl/lbl'+ str(it), lbl)
+        np.save('C:/Users/hrdli/Desktop/DP/data_vse/images/lbl/lbl'+ str(it), lbl)
         
+print('Predikce dokončena!!!')
