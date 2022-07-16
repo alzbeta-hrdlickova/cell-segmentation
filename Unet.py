@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 from torch.nn import init
 
-""" použitá U-Net, poskytnutá vedoucím práce (viz https://github.com/tomasvicar/ukazka_unet/blob/main/unet.py) """
+""" použitá U-Net """
 
 class unetConv2(nn.Module):
     def __init__(self, in_size, out_size,filter_size=3,stride=1,pad=1,do_batch=1):
