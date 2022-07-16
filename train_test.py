@@ -6,8 +6,7 @@ from dataloader import DataLoader
 from Unet import Unet
 from torch.utils import data
 
-""" model neuronové sítě, učení, validace a testování modelu, volání funkce DataLoader
-    čerpání informací z 11. cvičení MPC-MLR """
+""" model neuronové sítě, učení, validace a testování modelu, volání funkce DataLoader """
 
 batch=16
 
